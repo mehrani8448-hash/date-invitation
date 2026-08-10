@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>یک قرار؟ ❤️</title>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Tahoma, Arial, sans-serif;
+      background: linear-gradient(135deg, #fff0f5, #ffe4ec, #fff8fb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #3b2630;
+    }
+
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -40px;
+      font-size: 22px;
+      opacity: .35;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(0) rotate(0deg); }
+      to { transform: translateY(-110vh) rotate(360deg); }
+    }
+
+    .card {
+      width: min(92vw, 560px);
+      max-height: 92vh;
+      overflow-y: auto;
+      background: rgba(255,255,255,.88);
+      border-radius: 28px;
+      padding: 34px 26px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(130, 55, 85, .18);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    h1 {
+      font-size: clamp(24px, 6vw, 36px);
+      margin: 8px 0 14px;
+    }
+
+    p {
+      line-height: 1.9;
+      font-size: 17px;
+    }
+
+    .emoji {
+      font-size: 58px;
+      margin-bottom: 8px;
+    }
+
+    .buttons {
+      height: 150px;
+      margin-top: 28px;
+      position: relative;
+    }
+
+    button, .option {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: .2s ease;
+    }
+
+    .yes {
+      background: #e83e70;
+      color: white;
+      padding: 14px 30px;
+      border-radius: 999px;
+      font-size: 18px;
+      box-shadow: 0 8px 20px rgba(232,62,112,.25);
+    }
+
+    .yes:hover { transform: scale(1.05); }
+
+    .no {
+      position: absolute;
+      background: #eee;
+      color: #555;
+      padding: 12px 25px;
+      border-radius: 999px;
+      font-size: 17px;
+      left: 50%;
+      top: 70px;
+      transform: translateX(-50%);
+      user-select: none;
+    }
+
+    .question-note {
+      color: #9a6477;
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin: 22px 0 10px;
+      font-size: 18px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .option {
+      background: #fff;
+      border: 2px solid #f2c5d2;
+      padding: 13px 8px;
+      border-radius: 16px;
+      font-size: 15px;
+    }
+
+    .option.selected {
+      background: #ffe0e9;
+      border-color: #e83e70;
+      transform: translateY(-2px);
+    }
+
+    .hidden { display: none !important; }
+
+    .link-option {
+      background: transparent;
+      color: #d62f62;
+      text-decoration: underline;
+      margin-top: 7px;
+      font-size: 14px;
+    }
+
+    .submit {
+      width: 100%;
+      margin-top: 24px;
+      padding: 15px;
+      border-radius: 16px;
+      background: #e83e70;
+      color: white;
+      font-size: 18px;
+    }
+
+    .submit:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .back {
+      margin-top: 12px;
+      background: transparent;
+      color: #8b6471;
+      font-size: 14px;
+    }
+
+    .success {
+      font-size: 55px;
+      margin-bottom: 8px;
+    }
+
+    .error {
+      color: #c62828;
+      font-size: 14px;
+      min-height: 22px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 430px) {
+      .card { padding: 28px 18px; }
+      .options { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hearts" id="hearts"></div>
+
+  <main class="card">
+
+    <!-- PAGE 1 -->
+    <section class="page active" id="page1">
+      <div class="emoji">💌</div>
+      <h1>سلام فائزه ❤️</h1>
+      <p>امشب با من سر قرار میای؟ 🥰</p>
+
+      <div class="buttons" id="runArea">
+        <button class="yes" id="yesBtn">آره 😍</button>
+        <button class="no" id="noBtn">نه 😐</button>
+      </div>
+
+      <div class="question-note">فقط حواست باشه گزینه «نه» خیلی خجالتیه! 😄</div>
+    </section>
+
+    <!-- PAGE 2 -->
+    <section class="page" id="page2">
+      <div class="emoji">🗓️</div>
+      <h1>پس بریم سراغ برنامه ❤️</h1>
+
+      <div class="section-title">چه روزی؟</div>
+
+      <div class="options" id="dateOptions">
+        <button class="option" data-date="امشب">امشب ❤️</button>
+      </div>
+
+      <button class="link-option" id="otherDateBtn">امشب نمی‌تونه</button>
+
+      <div class="options hidden" id="otherDates">
+        <button class="option" data-date="فردا">فردا</button>
+        <button class="option" data-date="پس‌فردا">پس‌فردا</button>
+      </div>
+
+      <div class="section-title">چه ساعتی؟ ⏰</div>
+      <div class="options" id="timeOptions">
+        <button class="option" data-time="18:00">۱۸:۰۰</button>
+        <button class="option" data-time="19:00">۱۹:۰۰</button>
+        <button class="option" data-time="20:00">۲۰:۰۰</button>
+        <button class="option" data-time="21:00">۲۱:۰۰</button>
+        <button class="option" data-time="22:00">۲۲:۰۰</button>
+        <button class="option" data-time="23:00">۲۳:۰۰</button>
+      </div>
+
+      <div class="section-title">چه مدل قراری؟ ☕</div>
+      <div class="options" id="typeOptions">
+        <button class="option" data-type="تفریح 🎡">تفریح 🎡</button>
+        <button class="option" data-type="رستوران 🍝">رستوران 🍝</button>
+        <button class="option" data-type="قهوه ☕">قهوه ☕</button>
+      </div>
+
+      <button class="submit" id="submitBtn" disabled>ثبت قرار 💕</button>
+      <div class="error" id="error"></div>
+      <button class="back" id="backBtn">← برگشت</button>
+    </section>
+
+    <!-- PAGE 3 -->
+    <section class="page" id="page3">
+      <div class="success">🥰</div>
+      <h1>قرارمون ثبت شد!</h1>
+      <p id="summary"></p>
+      <p>منتظرت می‌مونم ❤️</p>
+    </section>
+
+  </main>
+
+<script>
+  /*
+    ==========================================================
+    تنظیمات EmailJS
+    ==========================================================
+    1) در EmailJS یک حساب بساز.
+    2) یک Email Service ایجاد کن.
+    3) یک Email Template بساز.
+    4) سه مقدار زیر را با مقادیر خودت جایگزین کن.
+  */
+
+  const EMAILJS_PUBLIC_KEY = "lhK36dMHRblmFpm5x";
+  const EMAILJS_SERVICE_ID = "service_yigcwmh";
+  const EMAILJS_TEMPLATE_ID = "template_re0npo2";
+
+  // ایمیلی که قرار است نتیجه به آن ارسال شود:
+  const RECEIVER_EMAIL = "ghaffarianmehran@gmail.com";
+
+  // راه‌اندازی EmailJS
+  emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY
+  });
+
+  // ---------- صفحه‌ها ----------
+  const page1 = document.getElementById("page1");
+  const page2 = document.getElementById("page2");
+  const page3 = document.getElementById("page3");
+
+  function showPage(page) {
+    [page1, page2, page3].forEach(p => p.classList.remove("active"));
+    page.classList.add("active");
+  }
+
+  document.getElementById("yesBtn").addEventListener("click", () => {
+    showPage(page2);
+  });
+
+  document.getElementById("backBtn").addEventListener("click", () => {
+    showPage(page1);
+  });
+
+  // ---------- دکمه فراری «نه» ----------
+  const noBtn = document.getElementById("noBtn");
+  const runArea = document.getElementById("runArea");
+
+  let escapes = 0;
+
+  function moveNoButton() {
+    escapes++;
+
+    const area = runArea.getBoundingClientRect();
+    const btn = noBtn.getBoundingClientRect();
+
+    const maxX = Math.max(10, area.width - btn.width - 10);
+    const maxY = Math.max(10, area.height - btn.height - 10);
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    noBtn.style.left = `${x}px`;
+    noBtn.style.top = `${y}px`;
+    noBtn.style.transform = "none";
+
+    // هر بار کوچک‌تر و سریع‌تر
+    const scale = Math.max(0.28, 1 - escapes * 0.09);
+    noBtn.style.transform = `scale(${scale})`;
+    noBtn.style.transitionDuration = `${Math.max(0.06, 0.22 - escapes * 0.015)}s`;
+  }
+
+  // با نزدیک شدن موس فرار می‌کند
+  noBtn.addEventListener("mouseenter", moveNoButton);
+
+  // برای موبایل: لمس کردن هم باعث فرار می‌شود
+  noBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    moveNoButton();
+  }, { passive: false });
+
+  // اگر somehow کلیک شد، باز هم فرار کند
+  noBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    moveNoButton();
+  });
+
+  // ---------- انتخاب تاریخ ----------
+  let selectedDate = "";
+  let selectedTime = "";
+  let selectedType = "";
+
+  function selectOption(containerId, attribute, setter) {
+    const container = document.getElementById(containerId);
+
+    container.addEventListener("click", (e) => {
+      const btn = e.target.closest(".option");
+      if (!btn) return;
+
+      container.querySelectorAll(".option").forEach(x => x.classList.remove("selected"));
+      btn.classList.add("selected");
+
+      setter(btn.dataset[attribute]);
+      updateSubmit();
+    });
+  }
+
+  selectOption("dateOptions", "date", value => selectedDate = value);
+  selectOption("otherDates", "date", value => selectedDate = value);
+  selectOption("timeOptions", "time", value => selectedTime = value);
+  selectOption("typeOptions", "type", value => selectedType = value);
+
+  document.getElementById("otherDateBtn").addEventListener("click", () => {
+    document.getElementById("otherDates").classList.toggle("hidden");
+  });
+
+  function updateSubmit() {
+    document.getElementById("submitBtn").disabled =
+      !(selectedDate && selectedTime && selectedType);
+  }
+
+  // ---------- ارسال ایمیل ----------
+  document.getElementById("submitBtn").addEventListener("click", async () => {
+    const error = document.getElementById("error");
+    const submitBtn = document.getElementById("submitBtn");
+    
+    // بررسی اینکه اطلاعات EmailJS واقعاً وارد شده باشند
+    if (
+      !EMAILJS_PUBLIC_KEY ||
+      !EMAILJS_SERVICE_ID ||
+      !EMAILJS_TEMPLATE_ID ||
+      EMAILJS_PUBLIC_KEY.startsWith("YOUR_") ||
+      EMAILJS_SERVICE_ID.startsWith("YOUR_") ||
+      EMAILJS_TEMPLATE_ID.startsWith("YOUR_")
+    ) {
+      error.textContent = "اطلاعات EmailJS کامل وارد نشده است.";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "در حال ثبت...";
+
+    const templateParams = {
+      to_email: RECEIVER_EMAIL,
+      date: selectedDate,
+      time: selectedTime,
+      type: selectedType,
+      message:
+        `فائزه برای قرار جواب مثبت داد ❤️\n\n` +
+        `تاریخ: ${selectedDate}\n` +
+        `ساعت: ${selectedTime}\n` +
+        `نوع قرار: ${selectedType}`
+    };
+
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+      );
+
+      document.getElementById("summary").innerHTML =
+        `📅 <b>${selectedDate}</b><br>` +
+        `⏰ <b>${selectedTime}</b><br>` +
+        `💗 <b>${selectedType}</b>`;
+
+      showPage(page3);
+
+    } catch (err) {
+      console.error(err);
+      error.textContent = "ارسال انجام نشد. تنظیمات EmailJS را بررسی کن.";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "ثبت قرار 💕";
+    }
+  });
+
+  // ---------- قلب‌های پس‌زمینه ----------
+  const hearts = document.getElementById("hearts");
+
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.textContent = ["❤️", "💕", "💗", "💖"][Math.floor(Math.random() * 4)];
+    h.style.left = Math.random() * 100 + "%";
+    h.style.animationDuration = (6 + Math.random() * 8) + "s";
+    h.style.animationDelay = (-Math.random() * 10) + "s";
+    h.style.fontSize = (14 + Math.random() * 18) + "px";
+    hearts.appendChild(h);
+  }
+</script>
+
+</body>
+</html>
